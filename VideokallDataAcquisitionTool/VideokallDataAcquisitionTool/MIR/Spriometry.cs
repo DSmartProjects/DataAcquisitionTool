@@ -272,7 +272,7 @@ namespace VideokallSBCDataAcquisionApp.Spirometer
             SpDevice = null;
         }
 
-       //Dummy line for pushing code to live 
+       
     }
     class Params
     {
