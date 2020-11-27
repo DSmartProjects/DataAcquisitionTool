@@ -32,7 +32,7 @@ namespace VideokallDataAcquisitionTool.comm
         SerialPort _serialPort;
        public delegate void ResponseReceived(string data);
         public ResponseReceived DataReceived;
-        public string[] Availableports { get; set; } 
+        public string[] Availableports { get; set; } = null;
 
         public void Serialports()
         {
@@ -46,7 +46,7 @@ namespace VideokallDataAcquisitionTool.comm
         string configformat = "Portname:{0}>BaudRate:{1}>";
         public void SaveConfig()
         {
-            string config = string.Format(configformat, SelectePortName.Trim(), BaudRate);
+            string config = string.Format(configformat, SelectePortName?.Trim(), BaudRate);
             using (System.IO.StreamWriter file =
             new System.IO.StreamWriter(configFileName, false))
             { 
@@ -59,14 +59,19 @@ namespace VideokallDataAcquisitionTool.comm
             try {
                 _serialPort = new SerialPort();
                 _serialPort.BaudRate = BaudRate;
-                if (SelectePortName.Length == 0 && Availableports.Count() == 1)
+                if (SelectePortName!= null && Availableports != null && SelectePortName.Length == 0 && Availableports.Count() > 0 )
                     SelectePortName = Availableports[0];
+                
 
-                _serialPort.PortName = SelectePortName;
                 _serialPort.Encoding = Encoding.ASCII;
 
                 _serialPort.DataReceived += new SerialDataReceivedEventHandler(_serialPort_DataReceived);
-                _serialPort.Open();
+                if (SelectePortName != null && SelectePortName.Length >0)
+                {
+                    _serialPort.PortName = SelectePortName;
+                    _serialPort.Open();
+                }
+
             } catch (Exception ex) {
                 string str = ex.Message; }
             
