@@ -44,6 +44,14 @@ namespace VideokallSBCDataAcquisionApp.comm
         public static readonly string SpiroVCResults = "spirovcresult>{0}>{1}>";
 
         public static readonly string SpiroFVCResults = "spirofvcresult>{0}>{1}>";
+        public static readonly string PODCMD = "pod>{0}>{1}>";//pod>1>d
+        public static readonly string SeatBackSTCmd = "stl>{0}>{1}>";//s>11>d
+        public static readonly string SeatBackheightCmd = "seatht>{0}>";//b>11>d
+        public static readonly string SeatReclineCmd = "seatrec>{0}>";
+        public static readonly string HM = "hm>";
+        public static readonly string WM = "hm>";
+        public static readonly string WT = "wt>";
+        public static readonly string CASRES = "casres>{0}>";
 
     }
 }

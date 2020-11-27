@@ -24,7 +24,7 @@ namespace VideokallDataAcquisitionTool
     {
         public static VKApp mainApp;
         FilterInfoCollection videoDevices;
-        FilterInfo[] videoCamList;//= new FilterInfo[2] ;
+        FilterInfo[] videoCamList; 
         System.Windows.Forms.Timer Watchdog = null;
         Commmodule CmmModule = null;
         delegate void CallBackDelegate();
@@ -33,17 +33,10 @@ namespace VideokallDataAcquisitionTool
         public VKApp()
         {
             InitializeComponent();
-              mainApp = this;
-            //StartCamera.Visible = false;
-            //// BtnLoadCamera.Visible = true;
-            //BTNPIC.Visible = false;
-            //BtnStop.Visible = false;
-
+              mainApp = this; 
             ShowHideControls(false);
         }
-
-      
-
+        #region CommMessage
         private void ReceivedMessage(string msg)
         {
             string[] cmd = msg.ToLower().Split('>');
@@ -61,13 +54,7 @@ namespace VideokallDataAcquisitionTool
                     {
                         if (!backgroundWorkerStartCamera.IsBusy)
                             backgroundWorkerStartCamera.RunWorkerAsync(msg);
-                        
                     }
-                    //else if (showhide == 0)
-                    //{
-                    //    StopCamera();
-                    //    this.WindowState = FormWindowState.Minimized;
-                    //}
                     break;
                 case "<pic":
                     LogMessage(msg);
@@ -81,29 +68,10 @@ namespace VideokallDataAcquisitionTool
                         showhide = Convert.ToInt32(cmd[1].Split(':')[1]);
                         if (showhide == 1)
                         {
-                            //int height = Convert.ToInt32(cmd[2].Split(':')[1]);
-                            //int width = Convert.ToInt32(cmd[3].Split(':')[1]);
-                            //int mainscWidht = Convert.ToInt32(cmd[4].Split(':')[1]);
-                            //int mainscheight = Convert.ToInt32(cmd[5].Split(':')[1]);
-                            //this.Width = mainscWidht / 2;
-                            //this.Height = mainscheight - 30;
-                            //this.Left = mainscWidht - mainscWidht / 2;
-                            //this.Top = 60;
-                            //this.TopMost = true;
-                            //videoSourcePlayer.Height = tabPage1.Height;
-                            //videoSourcePlayer.Width = tabPage1.Width;
-                            //this.Location = new Point(mainscWidht - mainscWidht / 2, 70);
-                            //this.WindowState = FormWindowState.Normal;
-                            //  StartMicorCamera(1);
                             if (!backgroundWorkerStartCamera.IsBusy)
                                 backgroundWorkerStartCamera.RunWorkerAsync(msg);
                             LogMessage(msg);
                         }
-                        //else if (showhide == 0)
-                        //{
-
-                        //    this.WindowState = FormWindowState.Minimized;
-                        //}
                     }
                     break;
                 case "<stopdermo":
@@ -143,14 +111,35 @@ namespace VideokallDataAcquisitionTool
                   
                     commtoMCC.SendData("connectedmcc");
                     commtoMCC.readData();
-                  //  commtoMCC.readData();
+                    break;
+                case "pod":
+                    if(cmd[2].Equals("d"))
+                      _serialDevice.DeployPod(cmd[1]);
+                    break;
+                case "seatht":
+                    _serialDevice.SeatBack(cmd[1]);
+                    break;
+                case "seatrec":
+                    _serialDevice.Recline(cmd[1]);
+                    break;
+                case "hm":
+                    _serialDevice.HeightMeasure();
+                    break;
+                case "wm":
+                    _serialDevice.WeightMeasure();
+                    break;
+                case "stl":
+                    if (cmd[2].Equals("d"))
+                        _serialDevice.DeployPod(cmd[1]);
+                    break;
+                case "wt":
+                    _serialDevice.TareWeight();
                     break;
             }
-         //   CmmModule.readData();
         }
+#endregion
 
-       
-      void  StartST()
+        void StartST()
         {
             int height = Convert.ToInt32(cmd[2].Split(':')[1]);
             int width = Convert.ToInt32(cmd[3].Split(':')[1]);
@@ -179,10 +168,8 @@ namespace VideokallDataAcquisitionTool
               cmd = ((string)e.Argument).ToLower().Split('>');
             
             this.Invoke(new ReadCommFiledelegate(StartST));
-
-           
         }
-
+        #region Microscope
         void LoadCamera()
         {
             try
@@ -206,7 +193,6 @@ namespace VideokallDataAcquisitionTool
                         videoCamList[index] = device;
                         index++;
                         LogMessage(device.Name);
-
                     }
                     else
                     {
@@ -217,7 +203,6 @@ namespace VideokallDataAcquisitionTool
             catch(Exception ex)
             {
                 LogMessage(ex.Message);
-                // CmmModule.SendData(string.Format(CommCommands.MIREXCEPTION, ex.Message));
                 if (!backgroundWorkerWrite.IsBusy)
                 {
                     backgroundWorkerWrite.RunWorkerAsync(string.Format(CommCommands.MIREXCEPTION, ex.Message));
@@ -230,31 +215,24 @@ namespace VideokallDataAcquisitionTool
         }
 
         private void BtnLoadCamera_Click(object sender, EventArgs e)
-        {
-            LogMessage("*****load camera*****");
-
-            LoadCamera();
-            LogMessage("*****end load camera *****");
+        { 
+            LoadCamera(); 
         }
 
         void StartMicorCamera(int indx)
         {
             if (indx < 0)
-                return;
-            LogMessage("*****   start    camera*****");
+                return; 
             try
             {                 
                 if (videoCamList!= null && videoCamList.Count() > indx && videoCamList[indx] != null)
                 {
                     VideoCaptureDevice videoCaptureSource = new VideoCaptureDevice(videoCamList[indx].MonikerString);
                     videoSourcePlayer.VideoSource = videoCaptureSource;
-                    videoSourcePlayer.Start();
-                    LogMessage("*****Started camera*****");
+                    videoSourcePlayer.Start(); 
                 }
                 else
                 {
-                    LogMessage("*****no camera*****");
-                    // CmmModule.SendData(string.Format(CommCommands.MIREXCEPTION, videoCamList.Count() == 0 ? "No device Connected" : "Please connect the device"));
                     if (!backgroundWorkerWrite.IsBusy)
                     {
                         backgroundWorkerWrite.RunWorkerAsync(string.Format(CommCommands.MIREXCEPTION, videoCamList.Count() == 0 ? "No device Connected" : "Please connect the device"));
@@ -266,7 +244,6 @@ namespace VideokallDataAcquisitionTool
                 LogMessage("*****exception on start  camera*****");
                 LogMessage(ex.ToString());
                 LogMessage(ex.Message);
-                //  CmmModule.SendData(string.Format(CommCommands.MIREXCEPTION, ex.ToString()));
                 if (!backgroundWorkerWrite.IsBusy)
                 {
                     backgroundWorkerWrite.RunWorkerAsync(string.Format(CommCommands.MIREXCEPTION, ex.ToString()));
@@ -278,11 +255,11 @@ namespace VideokallDataAcquisitionTool
             try
             {
                 using (System.IO.StreamWriter file =
-           new System.IO.StreamWriter("logs.txt", true))
+                new System.IO.StreamWriter("logs.txt", false))
                 {
                     file.WriteLine(DateTime.Now.ToString() + ": " + msg);
                 }
-            }catch(Exception ex)
+            }catch(Exception )
             {
 
             }
@@ -292,7 +269,6 @@ namespace VideokallDataAcquisitionTool
         {
             try
             {
-                LogMessage("****start Camera*****");
                 int index = CmbCameraList.SelectedIndex;
                 VideoCaptureDevice videoCaptureSource = new VideoCaptureDevice(videoCamList[index].MonikerString);
                 videoSourcePlayer.VideoSource = videoCaptureSource;
@@ -300,7 +276,6 @@ namespace VideokallDataAcquisitionTool
             }catch(Exception ex)
             {
                 LogMessage(ex.Message);
-               // CmmModule.SendData(string.Format(CommCommands.MIREXCEPTION, ex.Message));
                 if (!backgroundWorkerWrite.IsBusy)
                 {
                     backgroundWorkerWrite.RunWorkerAsync(string.Format(CommCommands.MIREXCEPTION, ex.Message));
@@ -319,21 +294,16 @@ namespace VideokallDataAcquisitionTool
             {
                 LogMessage("TakePic");
                 string folder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-
-
                 if (!Directory.Exists(folder + "\\Videokall"))
                 {
                     Directory.CreateDirectory(folder + "\\Videokall");
                 }
-
                     try
                     {
                         if (File.Exists(folder + "\\Videokall\\" + "capturedImage.png"))
                         {
                             File.Delete(folder + "\\Videokall\\" + "capturedImage.png");
-
                         }
-
                     }
                     catch (Exception ex)
                     {
@@ -348,8 +318,6 @@ namespace VideokallDataAcquisitionTool
                 {
                     Bitmap picture = videoSourcePlayer.GetCurrentVideoFrame();
                     picture.Save(folder + "\\Videokall\\" + "capturedImage.png", ImageFormat.Png);
-
-                    //   CmmModule.SendData(string.Format(CommCommands.MIROSCOPEPIC, "capturedImage.png"));
                     if (!backgroundWorkerWrite.IsBusy)
                     {
                         backgroundWorkerWrite.RunWorkerAsync(string.Format(CommCommands.MIROSCOPEPIC, "capturedImage.png"));
@@ -362,9 +330,7 @@ namespace VideokallDataAcquisitionTool
             {
                 LogMessage("TakePic exception");
                 LogMessage(ex.Message);
-
-                //  CmmModule.SendData(string.Format(CommCommands.MIREXCEPTION, ex.Message));
-               if( !backgroundWorkerWrite.IsBusy)
+                if ( !backgroundWorkerWrite.IsBusy)
                 {
                     backgroundWorkerWrite.RunWorkerAsync(string.Format(CommCommands.MIREXCEPTION, ex.Message));
                 }
@@ -413,7 +379,6 @@ namespace VideokallDataAcquisitionTool
 
         private void BTNPIC_Click(object sender, EventArgs e)
         {
-            
             TakePic();
         }
 
@@ -426,8 +391,6 @@ namespace VideokallDataAcquisitionTool
         void StopCamera()
         {
             videoSourcePlayer.BeginInvoke(new ReadCommFiledelegate(Stop));
-            //videoSourcePlayer.SignalToStop();
-            //videoSourcePlayer.WaitForStop();
             LogMessage("StopCamera");
 
         }
@@ -440,10 +403,6 @@ namespace VideokallDataAcquisitionTool
         {
             videoSourcePlayer.SignalToStop();
             videoSourcePlayer.WaitForStop();
-           // int index = CmbCameraList.SelectedIndex;
-          //  VideoCaptureDevice videoCaptureSource = new VideoCaptureDevice(videoDevices[index].MonikerString);
-          //  videoSourcePlayer.VideoSource = videoCaptureSource;
-            
         }
 
         private void videoSourcePlayer1_Click(object sender, EventArgs e)
@@ -453,7 +412,6 @@ namespace VideokallDataAcquisitionTool
 
         private void VKApp_FormClosing(object sender, FormClosingEventArgs e)
         {
-         //  commtoMCC.Reset();
             videoSourcePlayer.SignalToStop();
             videoSourcePlayer.WaitForStop();
             videoSourcePlayer.Dispose();
@@ -477,18 +435,14 @@ namespace VideokallDataAcquisitionTool
                 Watchdog.Tick += Watchdog_Tick;
                 Watchdog.Interval = 400;
                 Watchdog.Start();
-                //  CmmModule.SendData("");
-                //  CmmModule.readData();
               
                 this.WindowState = FormWindowState.Minimized;
                 CmmModule.ReadCommFile();
                 commtoMCC.ReceivedMessage += ReceivedMessage;
 
                 commtoMCC.initialize();
-              
-                ///
-              //  commsck = new socketComm();
-                //commsck.initialize();
+                LoadSerialdeviceinfo();
+                DisableSimulationMode(false);
             }
             catch(Exception ex)
             {
@@ -507,8 +461,6 @@ namespace VideokallDataAcquisitionTool
         private void Watchdog_Tick(object sender, EventArgs e)
         {
             Watchdog.Stop();
-            //if (this.InvokeRequired)
-            //    this.BeginInvoke(new ReadCommFiledelegate(ReadFile));
 
             if (!backgroundWorkerReadFile.IsBusy)
                 backgroundWorkerReadFile.RunWorkerAsync();
@@ -531,10 +483,9 @@ namespace VideokallDataAcquisitionTool
         {
             StopCamera();
         }
-
+#endregion
+        #region SPirometry
         Spriometry sp = new Spriometry();
-        
-
         private void button2_Click(object sender, EventArgs e)
         {
             stopSpirometer = true;
@@ -547,28 +498,10 @@ namespace VideokallDataAcquisitionTool
         double[,] testValues = new double[200, 2];
         private void chart1_Click(object sender, EventArgs e)
         {
-           
-            // fill data series
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    testValues[i, 0] = i; // X values
-            //    testValues[i, 1] = Math.Sin(i / 18.0 * Math.PI); // Y values
-            //}
-            // add new data series to the chart
-        //    chart1.AddDataSeries("Test", Color.DarkGreen, Chart.SeriesType.Line, 3);
-            // set X range to display
-        //    chart1.RangeX = new AForge.Range(-12,12);
-            // update the chart
-         //   chart1.UpdateDataSeries("Test", testValues);
+          
         }
 
-        
-
         public bool stopSpirometer = false;
-        bool testmode = true;
-      //  public OnFvcComplete OnComplete;
-      //  public OnFvcVolumeTime OnVolumeTimeRec;
-     //   public OnFvcFlowVolume OnFlowVolume;
         List<string> readingData = new List<string>();
 
         void StartFVC(string msg)
@@ -586,25 +519,17 @@ namespace VideokallDataAcquisitionTool
             try
             {
                 stopSpirometer = false;
-                //sp.StopTest();
                 label5.Text = "Startfvc";
 
                 sp.OnComplete += OnFVCComplete;
                 sp.OnFlowVolume += onVOLFlow;
                 sp.OnVolumeTime += OnVolumeTimeRec;
-
-                //      sp.OnvcVolumeTime += onvcVOLFlow;
-
                 if (sp.StartFVCTest())
                     commtoMCC.SendData(CommCommands.Spirostatussuccess);
                 else
                 {
                     commtoMCC.SendData(string.Format(CommCommands.SpirostatusFailed, "Failed to connect Spirometry"));
-                  //  stopSpirometer = true;
                 }
-                   
-                
-
             }catch(Exception ex)
             {
                 commtoMCC.SendData(string.Format(CommCommands.SpirostatusFailed, ex.Message));
@@ -626,7 +551,6 @@ namespace VideokallDataAcquisitionTool
 
             try {
                 stopSpirometer = false;
-              //  sp.StopTest();
                 label5.Text = "Startvc";
                 sp.OnvcVolumeTime += onvcVOLTime;
 
@@ -635,11 +559,7 @@ namespace VideokallDataAcquisitionTool
               else
                 {
                     commtoMCC.SendData(string.Format(CommCommands.SpirostatusFailed, "Failed to connect Spirometry"));
-                  //  stopSpirometer = false;
                 }
-                   
-                UpdateDatainUI();
-
             } catch(Exception ex) {
                 commtoMCC.SendData(string.Format(CommCommands.SpirostatusFailed, ex.Message));
             }
@@ -651,123 +571,76 @@ namespace VideokallDataAcquisitionTool
                 label5.Text = "Stop";
                 stopSpirometer = true;
                 commwithChartapp.SendMsg(string.Format(CommCommands.StopSpiro));
-
                 sp.StopTest();
                 commtoMCC.SendData(CommCommands.StoppedSpiroMeter);
                 clearspirodata();
-
-
             } catch(Exception ex) {
-
                 commtoMCC.SendData(string.Format(CommCommands.SpirostatusFailed, "stop:" + ex.Message));
-               
             }
-            
         }
         private void button1_Click(object sender, EventArgs e)
         {
-         
             StartFVC("");
         }
 
         private void onvcVOLTime(double v, double t)
         {
-            //string vol = string.Format("{0:0.00}", v);
-            //string time = string.Format("{0:0.00}", t);
-            //string s = vol + "," + time;
-            //if (!stopSpirometer)
-            //{
-            //    commwithChartapp.SendMsg(string.Format(CommCommands.SpirometerVC, s));
-            //    commtoMCC.SendData(string.Format(CommCommands.SpirometerVC, s));
-            //}
-           
             string[] arr = new string[2];
-
             arr[0] = v.ToString();
             arr[1] = t.ToString();
             if ( isDiagnosticMode)
             {
+                if (listView3.Items.Count > 50)
+                {
+                    listView3.Items.Clear();
+                }
                 ListViewItem itm = new ListViewItem(arr);
                 listView3.Items.Add(itm);
             }
-
         }
 
         private void onVOLFlow(float f, float v )
         {
-
-            //string flow = string.Format("{0:0.00}", f);
-            //string vol = string.Format("{0:0.00}", v);
-            //string s = flow + "," + vol;
-            //if(!stopSpirometer)
-            //{
-            //    commwithChartapp.SendMsg(string.Format(CommCommands.SpirometerFVCdata, s));
-            //    commtoMCC.SendData(string.Format(CommCommands.SpirometerFVCdata, s));
-
-            //}
-
             string[] arr = new string[2];
-
             arr[0] = f.ToString();
             arr[1] = v.ToString();
-            if (!isDiagnosticMode)
+            if (isDiagnosticMode)
             {
+                if (listView1.Items.Count > 50)
+                    listView1.Items.Clear();
                 ListViewItem itm = new ListViewItem(arr);
-
                 listView1.Items.Add(itm);
             }
-
-
         }
 
         private void OnVolumeTimeRec(double v, double t)
         {
-
             string vol = string.Format("{0:0.00}", v);
             string time = string.Format("{0:0.00}", t);
             string s = vol + "," + time;
-            //if(!stopSpirometer)
-            //{
-            //    commwithChartapp.SendMsg(string.Format(CommCommands.SpirometerFVCvtdata, s));
-            //    commtoMCC.SendData(string.Format(CommCommands.SpirometerFVCvtdata, s));
-            //}
-
             string[] arr = new string[2];
-
             arr[0] = v.ToString();
             arr[1] = t.ToString();
-            if ( isDiagnosticMode)
-            {
-                ListViewItem itm = new ListViewItem(arr);
-                listView2.Items.Add(itm);
-
-            }
-                //   label2.Text = s;
-            }
+                if ( isDiagnosticMode)
+                {
+                 if (listView2.Items.Count > 50)
+                    listView2.Items.Clear();
+                    ListViewItem itm = new ListViewItem(arr);
+                    listView2.Items.Add(itm);
+                }
+         }
 
         private void OnFVCComplete(TrialSpiro e)
-        {
-            string s = "c";
-        }
-
-        void UpdateDatainUI( )
-        {
-            
-        }
+        { 
+        } 
         private void backgroundWorkerspirometer_DoWork(object sender, DoWorkEventArgs e)
         {
           
         }
 
         private void button4_Click(object sender, EventArgs e)
-        {
-            //sp.OnComplete += OnFVCComplete;
-            //  sp.OnFlowVolume += OnVolumeTimeRec;
-            //  sp.OnVolumeTime += onVOLFlow;
-
-            StartVC("");
-
-
+        { 
+            StartVC(""); 
         }
 
         void clearspirodata()
@@ -791,8 +664,7 @@ namespace VideokallDataAcquisitionTool
         void ShowHideControls(bool showHide)
         {
             if (showHide)
-            {
-               // tabPage2.Enabled = true;
+            { 
                 StartCamera.Visible = true;
                 BtnLoadCamera.Visible = true;
                 BTNPIC.Visible = true;
@@ -800,8 +672,7 @@ namespace VideokallDataAcquisitionTool
                 CmbCameraList.Visible = true;
             }
             else
-            {
-               // tabPage2.Enabled = false;
+            { 
                 StartCamera.Visible = false;
                 BtnLoadCamera.Visible = false;
                 BTNPIC.Visible = false;
@@ -810,35 +681,425 @@ namespace VideokallDataAcquisitionTool
             }
         }
 
-     public   bool isDiagnosticMode = false;
+        public   bool isDiagnosticMode = false;
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
+
         {
             CheckBox ob = (CheckBox)sender;
             if (ob.Checked)
             {
-               // tabPage2.Enabled = true;
                 isDiagnosticMode = true;
                 StartCamera.Visible = true;
-                 BtnLoadCamera.Visible = true;
+                BtnLoadCamera.Visible = true;
                 BTNPIC.Visible = true;
                 BtnStop.Visible = true;
                 CmbCameraList.Visible = true;
+                tabPage2.Enabled = true;
+                ChkSimulation.Enabled = true;
             }
             else
             {
-              //  tabPage2.Enabled = false;
                 isDiagnosticMode = false;
                 StartCamera.Visible = false;
-                  BtnLoadCamera.Visible = false;
+                BtnLoadCamera.Visible = false;
                 BTNPIC.Visible = false;
                 BtnStop.Visible = false;
                 CmbCameraList.Visible = false;
+                ChkSimulation.Enabled = false;
             }
         }
 
-        private void tabPage2_Click(object sender, EventArgs e)
+            #endregion
+            #region CAS
+       private void tabPage2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void TxtValue_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void BtnPOD_Click(object sender, EventArgs e)
+        {
+            if (TxtValue.Text.Length > 0)
+            {
+                _serialDevice.DeployPod(TxtValue.Text.Trim()); 
+            }
+            else
+                ResposeList.Invoke(new CallBackDelegatespiro(UpdateResponseUI), "pleae add id/value");
+        }
+
+         
+        private void BtnSTLung_Click(object sender, EventArgs e)
+        {
+            if (TxtValue.Text.Length > 0)
+            {
+                _serialDevice.DeployStethoscopeLungs(TxtValue.Text.Trim()); 
+            }
+            else
+                ResposeList.Invoke(new CallBackDelegatespiro(UpdateResponseUI), "pleae add id/value");
+        }
+
+        private void BtnSeatBack_Click(object sender, EventArgs e)
+        {
+            if (TxtValue.Text.Length > 0)
+            {
+                _serialDevice.SeatBack(TxtValue.Text.Trim()); 
+            }
+            else
+                ResposeList.Invoke(new CallBackDelegatespiro(UpdateResponseUI), "pleae add id/value");
+
+        }
+
+        private void BtnSeatRecl_Click(object sender, EventArgs e)
+        {
+            if (TxtValue.Text.Length > 0)
+            {
+                _serialDevice.Recline(TxtValue.Text.Trim()); 
+            }
+            else
+                ResposeList.Invoke(new CallBackDelegatespiro(UpdateResponseUI), "pleae add id/value");
+
+        }
+
+        private void BtnHM_Click(object sender, EventArgs e)
+        {
+            _serialDevice.HeightMeasure( );  
+        }
+
+        private void BtnWM_Click(object sender, EventArgs e)
+        {
+          _serialDevice.WeightMeasure(); 
+        }
+
+        private void BtnRefresh_Click(object sender, EventArgs e)
+        {
+            _serialDevice.Serialports();
+            CmbComport.DataSource = _serialDevice.Availableports;
+            TxtBaudRate.Text = _serialDevice.BaudRate.ToString();
+        }
+
+
+        SerialDevice _serialDevice = new SerialDevice();
+        void LoadSerialdeviceinfo()
+        {
+            try {
+                _serialDevice.DataReceived += SerialPortDataReceived;
+                
+                _serialDevice.LoadConfig();
+                BtnRefresh_Click(null, null);
+                _serialDevice.InitializeSerialDevice(); 
+            } catch (Exception) { }
+           
+        }
+
+        void SerialPortDataReceived(string data)
+        {
+            SendCASMessageToMCC(data);
+            ResposeList.Invoke(new CallBackDelegatespiro(UpdateResponseUI), data);
+        }
+
+        void SendCASMessageToMCC(string msg)
+        {
+            string res = string.Format(CommCommands.CASRES, msg);
+            commtoMCC.SendData(res);
+        }
+        void UpdateResponseUI(string msg) {
+            try {
+                    if (ResposeList.Items.Count > 10)
+                        ResposeList.Items.Clear();
+                    ResposeList.Items.Add(msg); 
+
+            } catch(Exception )
+            {
+
+            }
+            
+        }
+        private void BtnSave_Click(object sender, EventArgs e)
+        {
+            _serialDevice.SaveConfig();
+
+            _serialDevice.InitializeSerialDevice();
+        }
+
+        private void CmbComport_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedport = (string) CmbComport.SelectedItem;
+            _serialDevice.SelectePortName = selectedport;
+        }
+
+        private void TxtBaudRate_TextAlignChanged(object sender, EventArgs e)
+        {
+          
+        }
+
+        
+        private void TxtBaudRate_TextChanged(object sender, EventArgs e)
+        {
+            try {
+               int test = Int32.Parse(TxtBaudRate.Text);
+            } catch (Exception) {
+                TxtBaudRate.Text = _serialDevice.BaudRate.ToString();
+            }
+        }
+
+        private void BtnRetract_Click_1(object sender, EventArgs e)
+        {
+            if (TxtValue.Text.Length > 0)
+                _serialDevice.Retract(TxtValue.Text);
+            else
+                ResposeList.Invoke(new CallBackDelegatespiro(UpdateResponseUI), "pleae add id/value");
+        }
+
+        private void BtnRetractPod_Click(object sender, EventArgs e)
+        {
+            if (TxtValue.Text.Length > 0)
+                _serialDevice.RetractPod(TxtValue.Text);
+            else
+                ResposeList.Invoke(new CallBackDelegatespiro(UpdateResponseUI), "pleae add id/value");
+        }
+
+         private void BtnWT_Click(object sender, EventArgs e)
+        {
+            _serialDevice.TareWeight();
+        }
+       #endregion CAS
+        #region CAS Simulation        
+        void DisableSimulationMode( bool enable)
+        {
+            radSIMPod.Enabled = enable;
+            RadSIMHM.Enabled = enable;
+            RADSIMWM.Enabled = enable;
+            RADSIMSEATBACK.Enabled = enable;
+            RADSIMRECLINE.Enabled = enable;
+            RADSIMST.Enabled = enable;
+            TxtSIMValue.Enabled = enable;
+            BTNSIMDACK.Enabled = enable;
+            BTNSIMDGOOD.Enabled = enable;
+            BTNSIMDBAD.Enabled = enable;
+            BTNSIMRACK.Enabled = enable;
+            RadSIMWT.Enabled = enable;
+            BTNSIMRFAILED.Enabled = enable;
+           // ChkSimulation.Enabled = enable;
+        }
+
+       
+        private void BTNSIMDACK_Click(object sender, EventArgs e)
+        {
+            if (radSIMPod.Checked)
+            {
+                string value = string.Format(_serialDevice._ResDeployPodCmd, TxtSIMValue.Text,"D");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if(RadSIMHM.Checked)
+            {
+                string value = string.Format(_serialDevice._ResHM, "", "");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMWM.Checked)
+            {
+                string value = string.Format(_serialDevice._ResWM, "", "");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+             
+            else if (RADSIMSEATBACK.Checked)
+            {
+                string value = string.Format(_serialDevice._ResSeatBackCmd, TxtSIMValue.Text,"");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMRECLINE.Checked)
+            {
+                string value = string.Format(_serialDevice._ResReclineCmd, TxtSIMValue.Text,"");
+                 
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMST.Checked)
+            {
+                string value = string.Format(_serialDevice._ResStethoscopeLungsCmd, TxtSIMValue.Text,"D");
+
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RadSIMWT.Checked)
+            {
+                string value = string.Format(_serialDevice._ResWT,"" );
+
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            
+        }
+        private void ChkSimulation_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ChkSimulation.Checked)
+            {
+                DisableSimulationMode(true);
+            }
+            else { DisableSimulationMode(false); }
+        }
+        #endregion
+
+        private void BTNSIMDGOOD_Click(object sender, EventArgs e)
+        {
+            if (radSIMPod.Checked)
+            {
+                string value = string.Format(_serialDevice._ResDeployPodCmd, TxtSIMValue.Text, "DG");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RadSIMHM.Checked)
+            {
+                string value = string.Format(_serialDevice._ResHM, TxtSIMValue.Text, "G");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMWM.Checked)
+            {
+                string value = string.Format(_serialDevice._ResWM, TxtSIMValue.Text, "G");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+
+            else if (RADSIMSEATBACK.Checked)
+            {
+                string value = string.Format(_serialDevice._ResSeatBackCmd, TxtSIMValue.Text, "G");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMRECLINE.Checked)
+            {
+                string value = string.Format(_serialDevice._ResReclineCmd, TxtSIMValue.Text, "G");
+
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMST.Checked)
+            {
+                string value = string.Format(_serialDevice._ResStethoscopeLungsCmd, TxtSIMValue.Text, "DG");
+
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RadSIMWT.Checked)
+            {
+                string value = string.Format(_serialDevice._ResWT, "G");
+
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+        }
+
+        private void RADSIMWM_CheckedChanged(object sender, EventArgs e)
+        {
+            if(RADSIMWM.Checked)
+            lblUnit.Text = "decagrams";
+            else
+                lblUnit.Text = "";
+        }
+
+        private void radWT_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void RadSIMHM_CheckedChanged(object sender, EventArgs e)
+        {
+            if (RadSIMHM.Checked)
+                lblUnit.Text = "centimetres";
+            else
+                lblUnit.Text = "";
+        }
+
+        private void BTNSIMDBAD_Click(object sender, EventArgs e)
+        {
+            if (radSIMPod.Checked)
+            {
+                string value = string.Format(_serialDevice._ResDeployPodCmd, TxtSIMValue.Text, "DB");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RadSIMHM.Checked)
+            {
+                string value = string.Format(_serialDevice._ResHM, TxtSIMValue.Text, "B");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMWM.Checked)
+            {
+                string value = string.Format(_serialDevice._ResWM, TxtSIMValue.Text, "B");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+
+            else if (RADSIMSEATBACK.Checked)
+            {
+                string value = string.Format(_serialDevice._ResSeatBackCmd, TxtSIMValue.Text, "B");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMRECLINE.Checked)
+            {
+                string value = string.Format(_serialDevice._ResReclineCmd, TxtSIMValue.Text, "B");
+
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMST.Checked)
+            {
+                string value = string.Format(_serialDevice._ResStethoscopeLungsCmd, TxtSIMValue.Text, "DB");
+
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RadSIMWT.Checked)
+            {
+                string value = string.Format(_serialDevice._ResWT, "B");
+
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+        }
+
+        private void BTNSIMRACK_Click(object sender, EventArgs e)
+        {
+            if (radSIMPod.Checked)
+            {
+                string value = string.Format(_serialDevice._ResDeployPodCmd, TxtSIMValue.Text, "RG");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMST.Checked)
+            {
+                string value = string.Format(_serialDevice._ResStethoscopeLungsCmd, TxtSIMValue.Text, "RG");
+
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+        }
+
+        private void BTNSIMRFAILED_Click(object sender, EventArgs e)
+        {
+            if (radSIMPod.Checked)
+            {
+                string value = string.Format(_serialDevice._ResDeployPodCmd, TxtSIMValue.Text, "RB");
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
+            else if (RADSIMST.Checked)
+            {
+                string value = string.Format(_serialDevice._ResStethoscopeLungsCmd, TxtSIMValue.Text, "RB");
+
+                SendCASMessageToMCC(value);
+                lblResponse.Text = value;
+            }
         }
     }
 }

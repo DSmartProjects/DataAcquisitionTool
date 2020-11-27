@@ -119,6 +119,7 @@
     <Compile Include="comm\commmodule.cs" />
     <Compile Include="comm\commmodulewithMCC.cs" />
     <Compile Include="comm\CommwithChartApp.cs" />
+    <Compile Include="comm\SerialDevice.cs" />
     <Compile Include="comm\socketComm.cs" />
     <Compile Include="MIR\Spriometry.cs" />
     <Compile Include="VKdataAcquisition.cs">
