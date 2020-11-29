@@ -115,25 +115,32 @@ namespace VideokallDataAcquisitionTool
                 case "pod":
                     if(cmd[2].Equals("d"))
                       _serialDevice.DeployPod(cmd[1]);
+                    commtoMCC.readData();
                     break;
                 case "seatht":
                     _serialDevice.SeatBack(cmd[1]);
+                    commtoMCC.readData();
                     break;
                 case "seatrec":
                     _serialDevice.Recline(cmd[1]);
+                    commtoMCC.readData();
                     break;
                 case "hm":
                     _serialDevice.HeightMeasure();
+                    commtoMCC.readData();
                     break;
                 case "wm":
                     _serialDevice.WeightMeasure();
+                    commtoMCC.readData();
                     break;
                 case "stl":
                     if (cmd[2].Equals("d"))
                         _serialDevice.DeployPod(cmd[1]);
+                    commtoMCC.readData();
                     break;
                 case "wt":
                     _serialDevice.TareWeight();
+                    commtoMCC.readData();
                     break;
             }
         }
