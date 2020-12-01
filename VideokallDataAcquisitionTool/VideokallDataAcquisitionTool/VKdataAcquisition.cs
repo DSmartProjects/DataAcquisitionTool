@@ -113,8 +113,11 @@ namespace VideokallDataAcquisitionTool
                     commtoMCC.readData();
                     break;
                 case "pod":
-                    if(cmd[2].Equals("d"))
-                      _serialDevice.DeployPod(cmd[1]);
+                    if (cmd[2].Equals("d"))
+                        _serialDevice.DeployPod(cmd[1]);
+                    else
+                        _serialDevice.RetractPod(cmd[1]);
+
                     commtoMCC.readData();
                     break;
                 case "seatht":
@@ -135,13 +138,17 @@ namespace VideokallDataAcquisitionTool
                     break;
                 case "stl":
                     if (cmd[2].Equals("d"))
-                        _serialDevice.DeployPod(cmd[1]);
+                        _serialDevice.DeployStethoscopeLungs(cmd[1]);
+                    else if (cmd[2].Equals("r"))
+                        _serialDevice.RetractStethoscopeLungs(cmd[1]);
+                      //  _serialDevice.DeployPod(cmd[1]);
                     commtoMCC.readData();
                     break;
                 case "wt":
                     _serialDevice.TareWeight();
                     commtoMCC.readData();
                     break;
+                
             }
         }
 #endregion

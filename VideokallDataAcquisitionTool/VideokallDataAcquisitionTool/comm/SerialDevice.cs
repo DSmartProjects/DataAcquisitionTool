@@ -102,6 +102,12 @@ namespace VideokallDataAcquisitionTool.comm
             WriteData(msg);
         }
 
+        public void RetractStethoscopeLungs(string cmd)
+        {
+            string msg = string.Format(_RectractCmd, cmd);
+            DataReceived?.Invoke("Cmd sent: " + msg);
+            WriteData(msg);
+        }
         public void SeatBack(string cmd)
         {
             string msg = string.Format(_SeatBackCmd, cmd);
