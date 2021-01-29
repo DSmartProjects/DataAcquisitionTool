@@ -169,7 +169,7 @@ namespace VideokallDataAcquisitionTool
             videoSourcePlayer.Width = tabPage1.Width;
             this.Location = new Point(mainscWidht - mainscWidht / 2, 70);
             this.WindowState = FormWindowState.Normal;
-
+            this.checkBox1.Visible = false;
             if (cmd[0].Equals("der"))
                 StartMicorCamera(1);
             else if (cmd[0].Equals("oto"))

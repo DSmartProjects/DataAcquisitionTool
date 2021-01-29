@@ -155,7 +155,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(61, 13);
             this.label1.TabIndex = 6;
-            this.label1.Text = "10-12-2020";
+            //this.label1.Text = "10-12-2020";
             // 
             // BtnStop
             // 
